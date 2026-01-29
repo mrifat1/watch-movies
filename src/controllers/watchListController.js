@@ -23,7 +23,7 @@ const addToWatchlist = async (req, res) => {
   });
 
   if (existingInWatchlist) {
-    return res.status(400).json({ error: "Movie already in the watchlist" });
+    return res.status(500).json({ message: "Movie already in the watchlist" });
   }
 
   const watchlistItem = await prisma.watchlistItem.create({
@@ -117,4 +117,18 @@ const removeFromWatchlist = async (req, res) => {
   });
 };
 
-export { addToWatchlist, updateWatchlistItem, removeFromWatchlist };
+const getAllWatchlist = async (req, res) => {
+  const watchlistItems = await prisma.watchlistItem.findMany({
+    where: { userId: req.user.id },
+    include: { movie: true },
+  });
+
+  console.log(watchlistItems);
+  res.status(200).json({
+    status: "success",
+    data: watchlistItems
+      
+  });
+};
+
+export { addToWatchlist, updateWatchlistItem, removeFromWatchlist, getAllWatchlist };

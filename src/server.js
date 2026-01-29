@@ -4,6 +4,7 @@ import { config } from "dotenv";
 //Routes Import 
 import movieRoutes from './routes/movieRoutes.js'
 import authRoutes from './routes/authRoutes.js'
+import watchlistRoutes from './routes/watchlistRoutes.js'
 import { connectDB, disconnectDB } from "./config/db.js";
 
 config()
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }))
 //     })
 // })
 
+app.use('/watchlist', watchlistRoutes)
 app.use('/movies', movieRoutes)
 app.use('/auth', authRoutes)
 
