@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -17,8 +11,9 @@ model User {
   id             String          @id @default(uuid())
   name           String
   email          String          @unique
-  password       String
   createdAt      DateTime        @default(now())
+  password       String
+  role           UserRole        @default(USER)
   movies         Movie[]         @relation("MovieCreator")
   watchlistItems WatchlistItem[]
 }
@@ -36,6 +31,8 @@ model Movie {
 
   creator        User            @relation("MovieCreator", fields: [createdBy], references: [id], onDelete: Cascade)
   watchlistItems WatchlistItem[]
+
+  @@unique([title, releaseYear])
 }
 
 model WatchlistItem {
@@ -60,4 +57,9 @@ enum WatchlistStatus {
   WATCHING
   COMPLETED
   DROPPED
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }

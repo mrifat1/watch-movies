@@ -32,7 +32,7 @@ const register = async (req, res) => {
   });
 
   // Generate JWT Token
-  const token = generateToken(user.id, res);
+  const token = generateToken(user.id,user.role,res);
 
   res.status(201).json({
     status: "success",
@@ -41,6 +41,7 @@ const register = async (req, res) => {
         id: user.id,
         name: name,
         email: email,
+        role: user.role,
       },
       token,
     },
@@ -71,7 +72,8 @@ const login = async (req, res) => {
   }
 
   // Generate JWT Token
-  const token = generateToken(user.id, res);
+  const token = generateToken(user.id, user.role, res);
+  
 
   res.status(201).json({
     status: "success",
@@ -79,11 +81,72 @@ const login = async (req, res) => {
       user: {
         id: user.id,
         email: email,
+        role: user.role
       },
       token,
     },
   });
 };
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+    const userId = req.user.id; // from auth middleware
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ error: "Passwords do not match" });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        error: "New password cannot be same as current password",
+      });
+    }
+
+    // const passwordRegex =
+    //   /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    // if (!passwordRegex.test(newPassword)) {
+    //   return res.status(400).json({
+    //     error:
+    //       "Password must be at least 8 characters and include uppercase, number, and special character",
+    //   });
+    // }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isValid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    res.status(200).json({
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 
 const logout = async (req, res) => {
   res.cookie("jwt", "", {

@@ -1,7 +1,7 @@
 import { prisma } from "../src/config/prisma.ts";
 
 
-const userId = "9de21f76-4f72-49f5-b957-4e9c351d95ad";
+const userId = "cc5c58b9-c06e-4f86-8be3-d0e75b81da7d";
 
 const movies = [
   {

@@ -15,6 +15,8 @@ export const authMiddleware = async (req, res, next) => {
     token = req.cookies.jwt;
   }
 
+
+
   if (!token) {
     return res.status(401).json({ error: "Not authorized, no token provided" });
   }
@@ -22,6 +24,8 @@ export const authMiddleware = async (req, res, next) => {
   try {
     // Verify token and extract the user Id
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("decoded token:", decoded);
+    
 
     const user = await prisma.user.findUnique({
         where:{
@@ -36,6 +40,8 @@ export const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
+    console.log("errcheck",err);
+    
     return res.status(401).json({ error: "Not authorized, token failed" });
   }
 };
