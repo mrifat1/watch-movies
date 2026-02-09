@@ -131,4 +131,37 @@ const getAllWatchlist = async (req, res) => {
   });
 };
 
-export { addToWatchlist, updateWatchlistItem, removeFromWatchlist, getAllWatchlist };
+const getWatchListById = async (req, res) => {
+  try {
+    const watchListItem = await prisma.watchlistItem.findUnique({
+      where: {
+        userId_movieId: {
+          userId: req.user.id,
+          movieId: req.params.id,
+        }
+      },
+      include: {
+        movie: true
+      }
+    })
+    // if(watchListItem.id !== req.user.id) {
+    //   return res.status(403).json({ error: "Not allowed to access this watchlist item" });
+    // }
+
+    if(!watchListItem) {
+      return res.status(404).json({ message: "Watchlist item not found" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: watchListItem
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
+  }
+}
+
+export { addToWatchlist, updateWatchlistItem, removeFromWatchlist, getAllWatchlist, getWatchListById };
